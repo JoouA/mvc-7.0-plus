@@ -5,6 +5,7 @@ class newsModel
 		$sql = 'select * from '.$this->table.' order by dateline desc';
 		$datas =  DB::findAll($sql);
 		foreach ($datas as $key => $value) {
+			$datas[$key]['content'] = $this->csubstr($value['content'],0,200);
 			$datas[$key]['dateline'] = date('Y-m-d H:i',$value['dateline']);
 		}
 		return $datas;
@@ -59,9 +60,22 @@ class newsModel
 			DB::insert($this->table,$data);
 			$data['info'] = "insert";
 			return $data;	
-		}	
-			
+		}			
 	}
 
+	// 解决截取中文后乱码的问题
+	public function csubstr($string, $start,$length){
+		$tmpstr='';
+		$strlen = $length - $start;
+		for ($i=0; $i < $strlen; $i++) { 
+			if (ord(substr($string,$i,1))>0xa0) {
+				$tmpstr .= substr($string, $i,3);
+				$i+=2;
+			}else{
+				$tmpstr .= substr($string, $i,1);
+			}
+		}
+		return $tmpstr;
+	}
 } 
- ?>
+?>
